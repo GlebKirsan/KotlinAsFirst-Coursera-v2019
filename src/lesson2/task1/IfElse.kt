@@ -3,6 +3,7 @@
 package lesson2.task1
 
 import lesson1.task1.discriminant
+import kotlin.math.acos
 import kotlin.math.max
 import kotlin.math.sqrt
 
@@ -63,7 +64,15 @@ fun minBiRoot(a: Double, b: Double, c: Double): Double {
  * Мой возраст. Для заданного 0 < n < 200, рассматриваемого как возраст человека,
  * вернуть строку вида: «21 год», «32 года», «12 лет».
  */
-fun ageDescription(age: Int): String = TODO()
+fun ageDescription(age: Int): String = "$age " + when {
+    age % 100 in 10..20 -> "лет"
+    age % 100 == 44 || age % 100 == 33 -> "года"
+    age % 10 == 0 -> "лет"
+    age % 10 == 1 -> "год"
+    age % 10 in 2..3 -> "года"
+    age % 10 in 4..9 -> "лет"
+    else -> ""
+}
 
 /**
  * Простая
@@ -76,7 +85,17 @@ fun timeForHalfWay(
     t1: Double, v1: Double,
     t2: Double, v2: Double,
     t3: Double, v3: Double
-): Double = TODO()
+): Double {
+    val firstPathPart = t1 * v1
+    val secondPathPart = t2 * v2
+    val thirdPathPart = t3 * v3
+    val fullPath = firstPathPart + secondPathPart + thirdPathPart
+    return when (val pathMiddle = fullPath / 2) {
+        in 0.0..firstPathPart -> pathMiddle / v1
+        in firstPathPart..(firstPathPart + secondPathPart) -> t1 + (pathMiddle - firstPathPart) / v2
+        else -> (pathMiddle - firstPathPart - secondPathPart) / v3 + t1 + t2
+    }
+}
 
 /**
  * Простая
@@ -91,7 +110,16 @@ fun whichRookThreatens(
     kingX: Int, kingY: Int,
     rookX1: Int, rookY1: Int,
     rookX2: Int, rookY2: Int
-): Int = TODO()
+): Int {
+    val isFirstAttacks = kingX - rookX1 == 0 || kingY - rookY1 == 0
+    val isSecondAttacks = kingX - rookX2 == 0 || kingY - rookY2 == 0
+    return when {
+        isFirstAttacks && !isSecondAttacks -> 1
+        isSecondAttacks && !isFirstAttacks -> 2
+        isFirstAttacks && isSecondAttacks -> 3
+        else -> 0
+    }
+}
 
 /**
  * Простая
@@ -107,7 +135,21 @@ fun rookOrBishopThreatens(
     kingX: Int, kingY: Int,
     rookX: Int, rookY: Int,
     bishopX: Int, bishopY: Int
-): Int = TODO()
+): Int {
+    val isRookAttacks = kingX - rookX == 0 || kingY - rookY == 0
+    val isBishopAttacks = kotlin.math.abs(kingX - bishopX) == kotlin.math.abs(kingY - bishopY)
+    return when {
+        isRookAttacks && !isBishopAttacks -> 1
+        isBishopAttacks && !isRookAttacks -> 2
+        isRookAttacks && isBishopAttacks -> 3
+        else -> 0
+    }
+}
+
+fun acosByThreeSides(a: Double, b: Double, c: Double): Double =
+    acos((a * a + b * b - c * c) / (2 * a * b))
+
+fun radiansToDegrees(angle: Double): Double = angle * 180 / Math.PI
 
 /**
  * Простая
@@ -117,7 +159,21 @@ fun rookOrBishopThreatens(
  * прямоугольным (вернуть 1) или тупоугольным (вернуть 2).
  * Если такой треугольник не существует, вернуть -1.
  */
-fun triangleKind(a: Double, b: Double, c: Double): Int = TODO()
+fun triangleKind(a: Double, b: Double, c: Double): Int {
+    val existence = a + b > c && a + c > b && b + c > a
+    if (!existence) {
+        return -1
+    }
+
+    val arcosC = radiansToDegrees(acosByThreeSides(a, b, c))
+    val arcosA = radiansToDegrees(acosByThreeSides(b, c, a))
+    val arcosB = radiansToDegrees(acosByThreeSides(a, c, b))
+    return when {
+        arcosA < 90.0 && arcosC < 90.0 && arcosB < 90.0 -> 0
+        arcosA > 90.0 || arcosC > 90.0 || arcosB > 90.0 -> 2
+        else -> 1
+    }
+}
 
 /**
  * Средняя
@@ -127,4 +183,14 @@ fun triangleKind(a: Double, b: Double, c: Double): Int = TODO()
  * Найти длину пересечения отрезков AB и CD.
  * Если пересечения нет, вернуть -1.
  */
-fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int = TODO()
+fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int {
+    return when {
+        c in a..b && d in a..b -> d - c
+        c in a..b -> b - c
+        d in a..b -> d - a
+        a in c..d && b in c..d -> b - a
+        a in c..d -> d - a
+        b in c..d -> b - c
+        else -> -1
+    }
+}
